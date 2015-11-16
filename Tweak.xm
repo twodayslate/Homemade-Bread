@@ -1,4 +1,5 @@
 #include "LAListener.h"
+#include "substrate.h"
 
 @interface UISystemNavigationAction
 - (id)destinations;
@@ -138,6 +139,39 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 }
 %end
 
+// struct  customStruct { 
+//         BOOL itemIsEnabled[27]; 
+//         BOOL timeString[64]; 
+//         int gsmSignalStrengthRaw; 
+//         int gsmSignalStrengthBars; 
+//         BOOL serviceString[100]; 
+//         BOOL serviceCrossfadeString[100]; 
+//         BOOL serviceImages[2][100]; 
+//         BOOL operatorDirectory[1024]; 
+//         unsigned int serviceContentType; 
+//         int wifiSignalStrengthRaw; 
+//         int wifiSignalStrengthBars; 
+//         unsigned int dataNetworkType; 
+//         int batteryCapacity; 
+//         unsigned int batteryState; 
+//         BOOL batteryDetailString[150]; 
+//         int bluetoothBatteryCapacity; 
+//         int thermalColor; 
+//         unsigned int thermalSunlightMode : 1; 
+//         unsigned int slowActivity : 1; 
+//         unsigned int syncActivity : 1; 
+//         BOOL activityDisplayId[256]; 
+//         unsigned int bluetoothConnected : 1; 
+//         unsigned int displayRawGSMSignal : 1; 
+//         unsigned int displayRawWifiSignal : 1; 
+//         unsigned int locationIconType : 1; 
+//         unsigned int quietModeInactive : 1; 
+//         unsigned int tetheringConnectionCount; 
+//         unsigned int batterySaverModeActive : 1; 
+//         BOOL breadcrumbTitle[256]; 
+//         BOOL breadcrumbSecondaryTitle[256]; 
+//     };
+
 @implementation SlideBackActivator
 - (void)activator:(id)activator receiveEvent:(id)event {
 	if(currentSceneManager) {
@@ -146,6 +180,10 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 		// The breadcrumb view is not in UIStatusBar view because it is actually in a UIStatusBarForegroundView
 		// and then inside a UIStatusBarBreadcrumbItemView
 		// can't see this while hooking SpringBoard and I don't want to hook UIKit. Am I doing this wrong?
+		// UIStatusBar *statusBar = [[%c(SpringBoard) sharedApplication] statusBar];
+		// struct customStruct raw = MSHookIvar<struct customStruct>(statusBar, "_currentRawData");
+		// I'd love for someone to figure out this struct
+		//HBLogDebug(@"raw Data = %@", (NSString *)raw.breadcrumbTitle);
 		//HBLogDebug(@"statusbar = %@", [(UIView *)[[%c(SpringBoard) sharedApplication] statusBar] recursiveDescription]);
  
 		HBLogDebug(@"current system navigation action = %@", [[%c(SpringBoard) sharedApplication] _systemNavigationAction]); // why is this always nil?
@@ -208,6 +246,8 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 
 	static SlideBackActivator *listener = [[SlideBackActivator alloc] init];
 
+
+	// TODO: put this in the init function
 	id la = [%c(LAActivator) sharedInstance];
 	if ([la respondsToSelector:@selector(hasSeenListenerWithName:)] && [la respondsToSelector:@selector(assignEvent:toListenerWithName:)]) {
 		if (![la hasSeenListenerWithName:@"org.thebigboss.homemadebread"]) {
