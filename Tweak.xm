@@ -30,48 +30,48 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 	return %orig;
 }
 - (_Bool)_isActivatingPinnedBreadcrumbApp:(id)arg1 withTransitionContext:(id)arg2 {
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 - (id)_breadcrumbNavigationActionForApplication:(id)arg1 withTransitionContext:(id)arg2{
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 - (void)_activateAppLink:(id)arg1 withAppLinkState:(id)arg2 transitionContext:(id)arg3 wasFromSpotlight:(_Bool)arg4 previousBreadcrumb:(id)arg5 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 - (void)_activateBreadcrumbApplication:(id)arg1 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 - (id)_breadcrumbBundleIdForApplication:(id)arg1 withTransitionContext:(id)arg2 {
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 - (void)_presentSpotlightFromEdge:(unsigned long long)arg1 fromBreadcrumb:(_Bool)arg2 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 - (void)_deviceOrientationChanged:(id)arg1 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 - (void)_application:(id)arg1 initiatedChangefromInterfaceOrientation:(long long)arg2 toInterfaceOrientation:(long long)arg3 scene:(id)arg4 sceneSettings:(id)arg5 transitionContext:(id)arg6 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 - (id)_rotationAnimationSettingsForRotationFromInterfaceOrientation:(long long)arg1 toInterfaceOrientation:(long long)arg2 medusaSettings:(id)arg3 {
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 - (_Bool)_handleAction:(id)arg1 forScene:(id)arg2 {
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 - (id)_applicationForAppLink:(id)arg1 {
-    %log;
-    return %orig;
+	%log;
+	return %orig;
 }
 
 %end
@@ -82,8 +82,8 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 
 %hook UIStatusBarBreadcrumbItemView
 - (void)userDidActivateButton:(id)arg1 {
-    %log;
-    %orig;
+	%log;
+	%orig;
 }
 %end
 
@@ -153,33 +153,33 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 		HBLogDebug(@"UIActionType = %d", [currentSceneManager.currentBreadcrumbNavigationAction UIActionType]); // 18
 		if(currentSceneManager.currentBreadcrumbNavigationAction) {
 			HBLogDebug(@"currentBreadcrumbNavigationAction = %@", currentSceneManager.currentBreadcrumbNavigationAction);
-	    	HBLogDebug(@"destinations = %@", currentSceneManager.currentBreadcrumbNavigationAction.destinations);
-	    	for(id dest in currentSceneManager.currentBreadcrumbNavigationAction.destinations) {
-	    		HBLogDebug(@"bundleID for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:(int)(NSInteger)dest]);
-	    		HBLogDebug(@"title for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction titleForDestination:(int)(NSInteger)dest]);
-	    		HBLogDebug(@"url for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:(int)(NSInteger)dest]);
-	    	}
-	    	if(currentSceneManager.currentBreadcrumbNavigationAction.destinations && [currentSceneManager.currentBreadcrumbNavigationAction.destinations count]) {
-	    		if([currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0]) {
-	    			HBLogDebug(@"it is a id");
-	    			NSString *displayID = [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0];
+			HBLogDebug(@"destinations = %@", currentSceneManager.currentBreadcrumbNavigationAction.destinations);
+			for(id dest in currentSceneManager.currentBreadcrumbNavigationAction.destinations) {
+				HBLogDebug(@"bundleID for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:(int)(NSInteger)dest]);
+				HBLogDebug(@"title for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction titleForDestination:(int)(NSInteger)dest]);
+				HBLogDebug(@"url for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:(int)(NSInteger)dest]);
+			}
+			if(currentSceneManager.currentBreadcrumbNavigationAction.destinations && [currentSceneManager.currentBreadcrumbNavigationAction.destinations count]) {
+				if([currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0]) {
+					HBLogDebug(@"it is a id");
+					NSString *displayID = [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0];
 
-	    			//  SBApplicationController *appController = (SBApplicationController *)[%c(SBApplicationController) sharedInstance];
-	    			//  SBApplication *app = [appController applicationWithBundleIdentifier:displayID];
-	    			// // [app activate];
-	    			//  [(SBUIController *)[%c(SBUIController) sharedInstance] activateApplication:app];
-	    			currentSceneManager = nil;
-	    			[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
-	    			[event setHandled:YES];
-	    			return;
-	    		} else if ([currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]) {
-	    			HBLogDebug(@"it is a url");
-	    			currentSceneManager = nil;
-	    			[[%c(SpringBoard) sharedApplication] openURL:[currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]];
-	    			[event setHandled:YES];
-	    			return;
-	    		}
-	    	}
+					//  SBApplicationController *appController = (SBApplicationController *)[%c(SBApplicationController) sharedInstance];
+					//  SBApplication *app = [appController applicationWithBundleIdentifier:displayID];
+					// // [app activate];
+					//  [(SBUIController *)[%c(SBUIController) sharedInstance] activateApplication:app];
+					currentSceneManager = nil;
+					[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
+					[event setHandled:YES];
+					return;
+				} else if ([currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]) {
+					HBLogDebug(@"it is a url");
+					currentSceneManager = nil;
+					[[%c(SpringBoard) sharedApplication] openURL:[currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]];
+					[event setHandled:YES];
+					return;
+				}
+			}
 		}
 	}
 	[event setHandled: NO];
@@ -206,15 +206,15 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 %ctor {
 	dlopen("/usr/lib/libactivator.dylib", RTLD_LAZY);
 
-    static SlideBackActivator *listener = [[SlideBackActivator alloc] init];
+	static SlideBackActivator *listener = [[SlideBackActivator alloc] init];
 
-    id la = [%c(LAActivator) sharedInstance];
-    if ([la respondsToSelector:@selector(hasSeenListenerWithName:)] && [la respondsToSelector:@selector(assignEvent:toListenerWithName:)]) {
-        if (![la hasSeenListenerWithName:@"org.thebigboss.homemadebread"]) {
-            [la assignEvent:[%c(LAEvent) eventWithName:@"libactivator.menu.press.single"] toListenerWithName:@"org.thebigboss.homemadebread"];
-        }
-    }
+	id la = [%c(LAActivator) sharedInstance];
+	if ([la respondsToSelector:@selector(hasSeenListenerWithName:)] && [la respondsToSelector:@selector(assignEvent:toListenerWithName:)]) {
+		if (![la hasSeenListenerWithName:@"org.thebigboss.homemadebread"]) {
+			[la assignEvent:[%c(LAEvent) eventWithName:@"libactivator.menu.press.single"] toListenerWithName:@"org.thebigboss.homemadebread"];
+		}
+	}
 
-    // register our listener. do this after the above so it still hasn't "seen" us if this is first launch
-    [(LAActivator*)[%c(LAActivator) sharedInstance] registerListener:listener forName:@"org.thebigboss.homemadebread"]; // can also be done in +load https://github.com/nickfrey/NowNow/blob/master/Tweak.xm#L31
+	// register our listener. do this after the above so it still hasn't "seen" us if this is first launch
+	[(LAActivator*)[%c(LAActivator) sharedInstance] registerListener:listener forName:@"org.thebigboss.homemadebread"]; // can also be done in +load https://github.com/nickfrey/NowNow/blob/master/Tweak.xm#L31
 }
