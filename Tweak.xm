@@ -17,17 +17,36 @@
 @property(retain, nonatomic) UISystemNavigationAction *currentBreadcrumbNavigationAction;
 @end
 
+@interface SBWorkspaceApplication
+@property(retain, nonatomic) id application; // @synthesize application=_application;
+@end
+
+
 static SBMainDisplaySceneManager *currentSceneManager = nil;
+static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCompositionService"];
 
 %hook SBMainDisplaySceneManager
-- (_Bool)_shouldBreadcrumbApplication:(id)arg1 withTransitionContext:(id)arg2 { 
+- (_Bool)_shouldBreadcrumbApplication:(SBWorkspaceApplication *)arg1 withTransitionContext:(id)arg2 { 
+	// returns false for a mail/sms composer view controller 
+	// so need to still save the breadcrumb anyways
+	// if someone can show me when this "app" is launched and it
+	// is not for a view controller, please let me know
+	if(currentSceneManager) {
+		if([whitelist containsObject:[arg1.application bundleIdentifier]]) { 
+			HBLogDebug(@"Still gonna save, cause just presenting the mail composer");
+			currentSceneManager = self;
+		} else {
+			currentSceneManager = nil;
+		}
+	}
+	
 	// So this is the importatnt piece. 
 	// However, the destination for the scene manager does not change
  	// even when there is no breadcrumb
  	// there is also always a destination, even when there is no breadcrumb
  	// I reset the variable, just in case it gets released somehow, but
  	// this scenemanager is pretty consistant
-	currentSceneManager = %orig ? self : nil;
+	currentSceneManager = %orig ? self : currentSceneManager;
 	return %orig;
 }
 - (_Bool)_isActivatingPinnedBreadcrumbApp:(id)arg1 withTransitionContext:(id)arg2 {
@@ -168,7 +187,7 @@ static SBMainDisplaySceneManager *currentSceneManager = nil;
 //         unsigned int quietModeInactive : 1; 
 //         unsigned int tetheringConnectionCount; 
 //         unsigned int batterySaverModeActive : 1; 
-//         BOOL breadcrumbTitle[256]; 
+//         BOOL breadcrumbTitle[256];  // I would assume this would be an NSString * but I don't understand why it would be 256
 //         BOOL breadcrumbSecondaryTitle[256]; 
 //     };
 
