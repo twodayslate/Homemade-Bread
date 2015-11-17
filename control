@@ -1,6 +1,6 @@
 Package: org.thebigboss.homemadebread
 Name: Homemade Bread
-Depends: mobilesubstrate, libactivator
+Depends: mobilesubstrate
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: Use the home button to activate a breadcrumb

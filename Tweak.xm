@@ -168,6 +168,8 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 }
 %end
 
+
+
 // struct  customStruct { 
 //         BOOL itemIsEnabled[27]; 
 //         BOOL timeString[64]; 
@@ -201,9 +203,8 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 //         BOOL breadcrumbSecondaryTitle[256]; 
 //     };
 
-@implementation SlideBackActivator
-- (void)activator:(id)activator receiveEvent:(id)event {
-	if(currentSceneManager) {
+static BOOL tryBreadcrumbLaunch() {
+if(currentSceneManager) {
 
 		HBLogDebug(@"SBMainStatusBarStateProvider = %@", [%c(SBMainStatusBarStateProvider) sharedInstance]);
 		// The breadcrumb view is not in UIStatusBar view because it is actually in a UIStatusBarForegroundView
@@ -244,25 +245,43 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 						//[(SBIconController *)[%c(SBIconController) sharedInstance] _presentTopEdgeSpotlight:NO];
 						//[(SBSearchGesture *)[%c(SBSearchGesture) sharedInstance] revealAnimated:YES];
 						currentSceneManager = nil;
-						[event setHandled:YES];
-						return;
+						return YES;
 					}
 
 					currentSceneManager = nil;
 					[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
-					[event setHandled:YES];
-					return;
+					return YES;
 				} else if ([currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]) {
 					HBLogDebug(@"it is a url");
 					currentSceneManager = nil;
 					[[%c(SpringBoard) sharedApplication] openURL:[currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]];
-					[event setHandled:YES];
-					return;
+					return YES;
 				}
 			}
 		}
 	}
-	[event setHandled: NO];
+	return NO;
+}
+
+%hook SpringBoard
+- (void)_handleMenuButtonEvent {
+	%log;
+	Class la = objc_getClass("LAActivator");
+	if (!la) {
+		HBLogDebug(@"Activator not installed so hooking menu button event");
+		if(!tryBreadcrumbLaunch()) {
+			%orig;
+		}
+	} else {
+		%orig;
+	}
+}
+%end
+
+@implementation SlideBackActivator
+- (void)activator:(id)activator receiveEvent:(id)event {
+	HBLogDebug(@"launching with activator");
+	[event setHandled:tryBreadcrumbLaunch()];
 }
 - (NSString *)activator:(LAActivator *)activator requiresLocalizedTitleForListenerName:(NSString *)listenerName {
 	return @"Homemade Bread";
