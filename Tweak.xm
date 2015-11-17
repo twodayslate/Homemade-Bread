@@ -15,6 +15,7 @@
 
 @interface SBMainDisplaySceneManager
 @property(retain, nonatomic) UISystemNavigationAction *currentBreadcrumbNavigationAction;
+- (void)_presentSpotlightFromEdge:(unsigned long long)arg1 fromBreadcrumb:(_Bool)arg2;
 @end
 
 @interface SBWorkspaceApplication
@@ -100,6 +101,11 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 - (void)activateApplication:(id)arg1;
 @end
 
+@interface SBIconController
+- (_Bool)presentSpotlightFromEdge:(unsigned long long)arg1 fromBreadcrumb:(_Bool)arg2 animated:(_Bool)arg3;
+- (_Bool)_presentTopEdgeSpotlight:(_Bool)arg1;
+@end
+
 %hook UIStatusBarBreadcrumbItemView
 - (void)userDidActivateButton:(id)arg1 {
 	%log;
@@ -149,6 +155,10 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 
 @interface UIView (extras)
 -(id)recursiveDescription;
+@end
+
+@interface SBSearchGesture
+-(void)revealAnimated:(BOOL)arg1;
 @end
 
 %hook SBUIController
@@ -225,6 +235,19 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 					//  SBApplication *app = [appController applicationWithBundleIdentifier:displayID];
 					// // [app activate];
 					//  [(SBUIController *)[%c(SBUIController) sharedInstance] activateApplication:app];
+
+					if([displayID isEqualToString:@"com.apple.springboard.spotlight-placeholder"]) {
+						// For some reason this doesn't want to display spotlight - even though
+						// this is the right call, must be missing something
+						[currentSceneManager _presentSpotlightFromEdge:1 fromBreadcrumb:1];
+						//[(SBIconController *)[%c(SBIconController) sharedInstance] presentSpotlightFromEdge:1 fromBreadcrumb:1 animated:NO];
+						//[(SBIconController *)[%c(SBIconController) sharedInstance] _presentTopEdgeSpotlight:NO];
+						//[(SBSearchGesture *)[%c(SBSearchGesture) sharedInstance] revealAnimated:YES];
+						currentSceneManager = nil;
+						[event setHandled:YES];
+						return;
+					}
+
 					currentSceneManager = nil;
 					[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
 					[event setHandled:YES];
