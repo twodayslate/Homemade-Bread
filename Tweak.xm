@@ -16,6 +16,7 @@
 @interface SBMainDisplaySceneManager
 @property(retain, nonatomic) UISystemNavigationAction *currentBreadcrumbNavigationAction;
 - (void)_presentSpotlightFromEdge:(unsigned long long)arg1 fromBreadcrumb:(_Bool)arg2;
+- (void)_activateBreadcrumbApplication:(id)arg1;
 @end
 
 @interface SBWorkspaceApplication
@@ -108,6 +109,17 @@ static NSArray *whitelist = @[@"com.apple.mobilesms.compose", @"com.apple.MailCo
 
 %hook UIStatusBarBreadcrumbItemView
 - (void)userDidActivateButton:(id)arg1 {
+	%log;
+	%orig;
+}
+%end
+
+%hook UIApplication
+- (void)_clearSystemNavigationAction {
+	%log;
+	%orig;
+}
+- (void)_setSystemNavigationAction:(id)arg1 {
 	%log;
 	%orig;
 }
@@ -223,17 +235,17 @@ if(currentSceneManager) {
 			HBLogDebug(@"currentBreadcrumbNavigationAction = %@", currentSceneManager.currentBreadcrumbNavigationAction);
 			HBLogDebug(@"destinations = %@", currentSceneManager.currentBreadcrumbNavigationAction.destinations);
 			for(id dest in currentSceneManager.currentBreadcrumbNavigationAction.destinations) {
-				HBLogDebug(@"bundleID for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:(int)(NSInteger)dest]);
-				HBLogDebug(@"title for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction titleForDestination:(int)(NSInteger)dest]);
-				HBLogDebug(@"url for %@: %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:(int)(NSInteger)dest]);
+				HBLogInfo(@"%@ %@ with bundleID %@ or url %@", dest, [currentSceneManager.currentBreadcrumbNavigationAction titleForDestination:(int)(NSInteger)dest], 
+						[currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:(int)(NSInteger)dest], 
+						[currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:(int)(NSInteger)dest]);
 			}
 			if(currentSceneManager.currentBreadcrumbNavigationAction.destinations && [currentSceneManager.currentBreadcrumbNavigationAction.destinations count]) {
 				if([currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0]) {
 					HBLogDebug(@"it is a id");
 					NSString *displayID = [currentSceneManager.currentBreadcrumbNavigationAction bundleIdForDestination:0];
 
-					//  SBApplicationController *appController = (SBApplicationController *)[%c(SBApplicationController) sharedInstance];
-					//  SBApplication *app = [appController applicationWithBundleIdentifier:displayID];
+					SBApplicationController *appController = (SBApplicationController *)[%c(SBApplicationController) sharedInstance];
+					SBApplication *app = [appController applicationWithBundleIdentifier:displayID];
 					// // [app activate];
 					//  [(SBUIController *)[%c(SBUIController) sharedInstance] activateApplication:app];
 
@@ -248,8 +260,9 @@ if(currentSceneManager) {
 						return YES;
 					}
 
+					[currentSceneManager _activateBreadcrumbApplication:app];
 					currentSceneManager = nil;
-					[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
+					//[[%c(SpringBoard) sharedApplication] launchApplicationWithIdentifier:displayID suspended:NO];
 					return YES;
 				} else if ([currentSceneManager.currentBreadcrumbNavigationAction URLForDestination:0]) {
 					HBLogDebug(@"it is a url");
