@@ -307,7 +307,7 @@ if(currentSceneManager) {
 	if([key isEqualToString:@"receives-raw-events"]) {
 		return [NSNumber numberWithBool:YES];
 	}
-	return [NSNumber numberWithBool:NO];
+	return nil;
 }
 
 @end
